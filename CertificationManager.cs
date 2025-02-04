@@ -6,51 +6,67 @@ namespace MultiComponentGUI
 {
     public class CertificationManager
     {
-        private readonly Dictionary<string, List<Certification>> personCertifications = new Dictionary<string, List<Certification>>();
+        private List<Certification> certifications;
+        private Stack<Action> undoStack;
+
+        public CertificationManager()
+        {
+            certifications = new List<Certification>();
+            undoStack = new Stack<Action>();
+        }
 
         public void AddCertification(string personName, string certName, DateTime expirationDate)
         {
-            if (!personCertifications.ContainsKey(personName))
-            {
-                personCertifications[personName] = new List<Certification>();
-            }
-
             var cert = new Certification
             {
+                Name = certName,
                 PersonName = personName,
-                CertificationName = certName,
                 ExpirationDate = expirationDate
             };
 
-            personCertifications[personName].Add(cert);
+            certifications.Add(cert);
+            undoStack.Push(() => certifications.Remove(cert));
+        }
+
+        public List<Certification> GetCertificationsForPerson(string personName)
+        {
+            return certifications
+                .Where(c => c.PersonName.Equals(personName, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        public bool HasExpiredCertifications(string personName)
+        {
+            return certifications.Any(c =>
+                c.PersonName.Equals(personName, StringComparison.OrdinalIgnoreCase) &&
+                c.IsExpired);
         }
 
         public void RemovePerson(string personName)
         {
-            if (personCertifications.ContainsKey(personName))
+            var personCerts = GetCertificationsForPerson(personName).ToList();
+            if (personCerts.Any())
             {
-                personCertifications.Remove(personName);
-            }
-        }
-
-        public void RemoveCertification(string personName, string certName)
-        {
-            if (personCertifications.ContainsKey(personName))
-            {
-                var certifications = personCertifications[personName];
-                certifications.RemoveAll(cert => cert.CertificationName == certName);
-
-                // If no certifications remain, remove the person entry
-                if (!certifications.Any())
+                foreach (var cert in personCerts)
                 {
-                    personCertifications.Remove(personName);
+                    certifications.Remove(cert);
                 }
+                undoStack.Push(() => certifications.AddRange(personCerts));
             }
         }
 
-        public IEnumerable<Certification> GetAllCertifications()
+        public void Undo()
         {
-            return personCertifications.Values.SelectMany(certs => certs);
+            if (undoStack.Count > 0)
+            {
+                var action = undoStack.Pop();
+                action();
+            }
+        }
+
+        public bool CanUndo()
+        {
+            return undoStack.Count > 0;
         }
     }
 }

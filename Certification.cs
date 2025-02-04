@@ -4,19 +4,14 @@ namespace MultiComponentGUI
 {
     public class Certification
     {
+        public string Name { get; set; }
         public string PersonName { get; set; }
-        public string CertificationName { get; set; }
         public DateTime ExpirationDate { get; set; }
+        public bool IsExpired => DateTime.Now > ExpirationDate;
 
         public override string ToString()
         {
-            return $"{CertificationName} (Expires: {ExpirationDate:MM/dd/yyyy})";
-        }
-
-        // Placeholder method to replace RefreshCertificationList if needed
-        public void DisplayCertificationDetails()
-        {
-            Console.WriteLine($"Person: {PersonName}, Certification: {CertificationName}, Expiration: {ExpirationDate:MM/dd/yyyy}");
+            return $"{Name} (Expires: {ExpirationDate:d})";
         }
     }
 }

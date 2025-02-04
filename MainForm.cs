@@ -57,12 +57,11 @@ namespace MultiComponentGUI
         private Button addCertButton;
         private Button removePersonButton;
         private Button undoButton;
-        private Button exitButton;
-        private CertificationManager certManager;
+        private Label personNameLabel;
+        private Label searchLabel;
 
         public MainForm()
         {
-            certManager = new CertificationManager();
             InitializeComponent();
         }
 
@@ -72,162 +71,81 @@ namespace MultiComponentGUI
             this.ClientSize = new Size(500, 400);
             this.Text = "Certification Tracker";
             this.BackColor = Color.Red;
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             this.StartPosition = FormStartPosition.CenterScreen;
 
-            // Person Name Label and TextBox
-            var personNameLabel = new Label
-            {
-                Text = "Person Name:",
-                Location = new Point(20, 20),
-                AutoSize = true
-            };
+            // Person Name Label
+            personNameLabel = new Label();
+            personNameLabel.Text = "Person Name:";
+            personNameLabel.Location = new Point(20, 20);
+            personNameLabel.AutoSize = true;
             this.Controls.Add(personNameLabel);
 
-            personNameTextBox = new TextBox
-            {
-                Location = new Point(120, 20),
-                Width = 200
-            };
-            this.Controls.Add(personNameTextBox);
-
-            // Search TextBox and Label
-            var searchLabel = new Label
-            {
-                Text = "Search:",
-                Location = new Point(20, 60),
-                AutoSize = true
-            };
+            // Search Label
+            searchLabel = new Label();
+            searchLabel.Text = "Search:";
+            searchLabel.Location = new Point(20, 60);
+            searchLabel.AutoSize = true;
             this.Controls.Add(searchLabel);
 
-            searchTextBox = new TextBox
-            {
-                Location = new Point(120, 60),
-                Width = 200
-            };
-            searchTextBox.TextChanged += SearchTextBox_TextChanged;
+            // Person Name TextBox
+            personNameTextBox = new TextBox();
+            personNameTextBox.Location = new Point(120, 20);
+            personNameTextBox.Width = 200;
+            this.Controls.Add(personNameTextBox);
+
+            // Search TextBox
+            searchTextBox = new TextBox();
+            searchTextBox.Location = new Point(120, 60);
+            searchTextBox.Width = 200;
             this.Controls.Add(searchTextBox);
 
-            // Certification ListBox and Label
-            var certsLabel = new Label
-            {
-                Text = "Certifications:",
-                Location = new Point(20, 100),
-                AutoSize = true
-            };
-            this.Controls.Add(certsLabel);
-
-            certificationListBox = new ListBox
-            {
-                Location = new Point(20, 120),
-                Size = new Size(300, 120)
-            };
+            // Certification ListBox
+            certificationListBox = new ListBox();
+            certificationListBox.Location = new Point(20, 100);
+            certificationListBox.Size = new Size(300, 200);
             this.Controls.Add(certificationListBox);
 
             // Add Certification Button
-            addCertButton = new Button
-            {
-                Text = "Add Certification",
-                Location = new Point(350, 20),
-                Width = 120,
-                BackColor = Color.Black,
-                ForeColor = Color.White
-            };
+            addCertButton = new Button();
+            addCertButton.Text = "Add Certification";
+            addCertButton.Location = new Point(350, 20);
+            addCertButton.Size = new Size(120, 30);
             addCertButton.Click += AddCertButton_Click;
             this.Controls.Add(addCertButton);
 
             // Remove Person Button
-            removePersonButton = new Button
-            {
-                Text = "Remove Person",
-                Location = new Point(350, 60),
-                Width = 120,
-                BackColor = Color.Black,
-                ForeColor = Color.White
-            };
+            removePersonButton = new Button();
+            removePersonButton.Text = "Remove Person";
+            removePersonButton.Location = new Point(350, 60);
+            removePersonButton.Size = new Size(120, 30);
             removePersonButton.Click += RemovePersonButton_Click;
             this.Controls.Add(removePersonButton);
 
             // Undo Button
-            undoButton = new Button
-            {
-                Text = "Undo",
-                Location = new Point(350, 100),
-                Width = 120,
-                BackColor = Color.Black,
-                ForeColor = Color.White,
-                Enabled = false
-            };
+            undoButton = new Button();
+            undoButton.Text = "Undo";
+            undoButton.Location = new Point(350, 100);
+            undoButton.Size = new Size(120, 30);
             undoButton.Click += UndoButton_Click;
             this.Controls.Add(undoButton);
-
-            // Exit Button
-            exitButton = new Button
-            {
-                Text = "Exit",
-                Location = new Point(350, 140),
-                Width = 120,
-                BackColor = Color.Black,
-                ForeColor = Color.White
-            };
-            exitButton.Click += (s, e) => this.Close();
-            this.Controls.Add(exitButton);
         }
 
         private void AddCertButton_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(personNameTextBox.Text))
-            {
-                MessageBox.Show("Please enter a person name.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            using (var inputForm = new CertificationInputForm())
-            {
-                if (inputForm.ShowDialog() == DialogResult.OK)
-                {
-                    string personName = personNameTextBox.Text.Trim();
-                    string certificationName = inputForm.CertificationName;
-                    DateTime expirationDate = inputForm.ExpirationDate;
-
-                    certManager.AddCertification(personName, certificationName, expirationDate);
-                    MessageBox.Show("Certification added successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    undoButton.Enabled = certManager.CanUndo();
-                    SearchTextBox_TextChanged(null, EventArgs.Empty);
-                }
-            }
+            MessageBox.Show("Add Certification button clicked.");
         }
 
         private void RemovePersonButton_Click(object sender, EventArgs e)
         {
-            string personName = personNameTextBox.Text.Trim();
-            if (string.IsNullOrWhiteSpace(personName))
-            {
-                MessageBox.Show("Please enter a person name.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            certManager.RemovePerson(personName);
-            MessageBox.Show("Person removed successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            undoButton.Enabled = certManager.CanUndo();
-            SearchTextBox_TextChanged(null, EventArgs.Empty);
+            MessageBox.Show("Remove Person button clicked.");
         }
 
         private void UndoButton_Click(object sender, EventArgs e)
         {
-            certManager.Undo();
-            undoButton.Enabled = certManager.CanUndo();
-            SearchTextBox_TextChanged(null, EventArgs.Empty);
-        }
-
-        private void SearchTextBox_TextChanged(object sender, EventArgs e)
-        {
-            string searchText = searchTextBox.Text.Trim();
-            var certs = certManager.GetCertificationsForPerson(searchText);
-            certificationListBox.Items.Clear();
-            foreach (var cert in certs)
-            {
-                certificationListBox.Items.Add($"{cert.Name} (Expires: {cert.ExpirationDate.ToShortDateString()})");
-            }
+            MessageBox.Show("Undo button clicked.");
         }
     }
 }
+

@@ -7,6 +7,7 @@ namespace MultiComponentGUI
         public string Name { get; set; }
         public string PersonName { get; set; }
         public DateTime ExpirationDate { get; set; }
+
         public bool IsExpired => DateTime.Now > ExpirationDate;
 
         public override string ToString()

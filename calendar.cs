@@ -13,7 +13,7 @@ namespace MultiComponentGUI
         private Label certNameLabel;
         private Label personNameLabel;
         private Label selectedDateLabel;
-        private CertificationManager certManager;
+        private readonly CertificationManager certManager;
 
         public calendar(CertificationManager manager)
         {

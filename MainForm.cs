@@ -45,107 +45,217 @@ For future projects, I can improve by:
 
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace MultiComponentGUI
 {
     public class MainForm : Form
     {
+        private Label personNameLabel;
+        private Label searchLabel;
         private TextBox personNameTextBox;
         private TextBox searchTextBox;
+        private Button searchButton;
         private ListBox certificationListBox;
         private Button addCertButton;
         private Button removePersonButton;
         private Button undoButton;
-        private Label personNameLabel;
-        private Label searchLabel;
+
+        private CertificationManager certificationManager;
 
         public MainForm()
         {
+            certificationManager = new CertificationManager();
             InitializeComponent();
         }
 
         private void InitializeComponent()
         {
-            // Form properties
-            this.ClientSize = new Size(500, 400);
-            this.Text = "Certification Tracker";
-            this.BackColor = Color.Red;
-            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            this.personNameLabel = new System.Windows.Forms.Label();
+            this.searchLabel = new System.Windows.Forms.Label();
+            this.personNameTextBox = new System.Windows.Forms.TextBox();
+            this.searchTextBox = new System.Windows.Forms.TextBox();
+            this.certificationListBox = new System.Windows.Forms.ListBox();
+            this.addCertButton = new System.Windows.Forms.Button();
+            this.removePersonButton = new System.Windows.Forms.Button();
+            this.undoButton = new System.Windows.Forms.Button();
+            this.searchButton = new System.Windows.Forms.Button();
+
+            this.SuspendLayout();
+
+            // personNameLabel
+            this.personNameLabel.AutoSize = true;
+            this.personNameLabel.Location = new System.Drawing.Point(20, 20);
+            this.personNameLabel.Name = "personNameLabel";
+            this.personNameLabel.Size = new System.Drawing.Size(74, 13);
+            this.personNameLabel.TabIndex = 0;
+            this.personNameLabel.Text = "Person Name:";
+
+            // searchLabel
+            this.searchLabel.AutoSize = true;
+            this.searchLabel.Location = new System.Drawing.Point(20, 60);
+            this.searchLabel.Name = "searchLabel";
+            this.searchLabel.Size = new System.Drawing.Size(44, 13);
+            this.searchLabel.TabIndex = 1;
+            this.searchLabel.Text = "Search:";
+
+            // personNameTextBox
+            this.personNameTextBox.Location = new System.Drawing.Point(120, 20);
+            this.personNameTextBox.Name = "personNameTextBox";
+            this.personNameTextBox.Size = new System.Drawing.Size(200, 20);
+            this.personNameTextBox.TabIndex = 2;
+
+            // searchTextBox
+            this.searchTextBox.Location = new System.Drawing.Point(120, 60);
+            this.searchTextBox.Name = "searchTextBox";
+            this.searchTextBox.Size = new System.Drawing.Size(200, 20);
+            this.searchTextBox.TabIndex = 3;
+
+            // searchButton
+            this.searchButton.Location = new System.Drawing.Point(350, 60);
+            this.searchButton.Name = "searchButton";
+            this.searchButton.Size = new System.Drawing.Size(120, 30);
+            this.searchButton.TabIndex = 8;
+            this.searchButton.Text = "Search";
+            this.searchButton.BackColor = Color.Black;
+            this.searchButton.ForeColor = Color.White;
+            this.searchButton.Click += new System.EventHandler(this.SearchButton_Click);
+
+            // certificationListBox
+            this.certificationListBox.Location = new System.Drawing.Point(20, 100);
+            this.certificationListBox.Name = "certificationListBox";
+            this.certificationListBox.Size = new System.Drawing.Size(300, 199);
+            this.certificationListBox.TabIndex = 4;
+
+            // addCertButton
+            this.addCertButton.Location = new System.Drawing.Point(350, 20);
+            this.addCertButton.Name = "addCertButton";
+            this.addCertButton.Size = new System.Drawing.Size(120, 30);
+            this.addCertButton.TabIndex = 5;
+            this.addCertButton.Text = "Add Certification";
+            this.addCertButton.BackColor = Color.Black;
+            this.addCertButton.ForeColor = Color.White;
+            this.addCertButton.Click += new System.EventHandler(this.AddCertButton_Click);
+
+            // removePersonButton
+            this.removePersonButton.Location = new System.Drawing.Point(350, 100);
+            this.removePersonButton.Name = "removePersonButton";
+            this.removePersonButton.Size = new System.Drawing.Size(120, 30);
+            this.removePersonButton.TabIndex = 6;
+            this.removePersonButton.Text = "Remove Person";
+            this.removePersonButton.BackColor = Color.Black;
+            this.removePersonButton.ForeColor = Color.White;
+            this.removePersonButton.Click += new System.EventHandler(this.RemovePersonButton_Click);
+
+            // undoButton
+            this.undoButton.Location = new System.Drawing.Point(350, 140);
+            this.undoButton.Name = "undoButton";
+            this.undoButton.Size = new System.Drawing.Size(120, 30);
+            this.undoButton.TabIndex = 7;
+            this.undoButton.Text = "Undo";
+            this.undoButton.BackColor = Color.Black;
+            this.undoButton.ForeColor = Color.White;
+            this.undoButton.Click += new System.EventHandler(this.UndoButton_Click);
+
+            // MainForm
+            this.BackColor = System.Drawing.Color.Red;
+            this.ClientSize = new System.Drawing.Size(500, 400);
+            this.Controls.Add(this.personNameLabel);
+            this.Controls.Add(this.searchLabel);
+            this.Controls.Add(this.personNameTextBox);
+            this.Controls.Add(this.searchTextBox);
+            this.Controls.Add(this.searchButton);
+            this.Controls.Add(this.certificationListBox);
+            this.Controls.Add(this.addCertButton);
+            this.Controls.Add(this.removePersonButton);
+            this.Controls.Add(this.undoButton);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
-            this.StartPosition = FormStartPosition.CenterScreen;
-
-            // Person Name Label
-            personNameLabel = new Label();
-            personNameLabel.Text = "Person Name:";
-            personNameLabel.Location = new Point(20, 20);
-            personNameLabel.AutoSize = true;
-            this.Controls.Add(personNameLabel);
-
-            // Search Label
-            searchLabel = new Label();
-            searchLabel.Text = "Search:";
-            searchLabel.Location = new Point(20, 60);
-            searchLabel.AutoSize = true;
-            this.Controls.Add(searchLabel);
-
-            // Person Name TextBox
-            personNameTextBox = new TextBox();
-            personNameTextBox.Location = new Point(120, 20);
-            personNameTextBox.Width = 200;
-            this.Controls.Add(personNameTextBox);
-
-            // Search TextBox
-            searchTextBox = new TextBox();
-            searchTextBox.Location = new Point(120, 60);
-            searchTextBox.Width = 200;
-            this.Controls.Add(searchTextBox);
-
-            // Certification ListBox
-            certificationListBox = new ListBox();
-            certificationListBox.Location = new Point(20, 100);
-            certificationListBox.Size = new Size(300, 200);
-            this.Controls.Add(certificationListBox);
-
-            // Add Certification Button
-            addCertButton = new Button();
-            addCertButton.Text = "Add Certification";
-            addCertButton.Location = new Point(350, 20);
-            addCertButton.Size = new Size(120, 30);
-            addCertButton.Click += AddCertButton_Click;
-            this.Controls.Add(addCertButton);
-
-            // Remove Person Button
-            removePersonButton = new Button();
-            removePersonButton.Text = "Remove Person";
-            removePersonButton.Location = new Point(350, 60);
-            removePersonButton.Size = new Size(120, 30);
-            removePersonButton.Click += RemovePersonButton_Click;
-            this.Controls.Add(removePersonButton);
-
-            // Undo Button
-            undoButton = new Button();
-            undoButton.Text = "Undo";
-            undoButton.Location = new Point(350, 100);
-            undoButton.Size = new Size(120, 30);
-            undoButton.Click += UndoButton_Click;
-            this.Controls.Add(undoButton);
+            this.Name = "MainForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Certification Tracker";
+            this.ResumeLayout(false);
+            this.PerformLayout();
         }
 
         private void AddCertButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Add Certification button clicked.");
+            // Add Certification Button Clicked
+            var personName = personNameTextBox.Text.Trim();
+            if (string.IsNullOrWhiteSpace(personName))
+            {
+                MessageBox.Show("Enter a valid name before adding a certification.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            using (var certForm = new CertificationInputForm())
+            {
+                if (certForm.ShowDialog() == DialogResult.OK)
+                {
+                    certificationManager.AddCertification(personName, certForm.CertificationName, certForm.ExpirationDate);
+                    MessageBox.Show("Certification added successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    UpdateCertificationList(personName);
+                }
+            }
+        }
+
+        private void SearchButton_Click(object sender, EventArgs e)
+        {
+            string searchTerm = searchTextBox.Text.ToLower();
+            string personName = personNameTextBox.Text.ToLower();
+
+            var certifications = certificationManager.GetCertificationsForPerson(personName);
+            var filteredCerts = certifications.Where(c => c.Name.ToLower().Contains(searchTerm)).ToList();
+
+            certificationListBox.Items.Clear();
+            foreach (var cert in filteredCerts)
+            {
+                certificationListBox.Items.Add(cert);
+            }
+
+            if (filteredCerts.Count == 0)
+            {
+                certificationListBox.Items.Add("No certifications found.");
+            }
         }
 
         private void RemovePersonButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Remove Person button clicked.");
+            var personName = personNameTextBox.Text.Trim();
+            if (string.IsNullOrWhiteSpace(personName))
+            {
+                MessageBox.Show("Enter a valid name to remove.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            certificationManager.RemovePerson(personName);
+            MessageBox.Show($"All certifications for {personName} removed.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            certificationListBox.Items.Clear();
         }
 
         private void UndoButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Undo button clicked.");
+            if (certificationManager.CanUndo())
+            {
+                certificationManager.Undo();
+                MessageBox.Show("Undo successful.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                UpdateCertificationList(personNameTextBox.Text.Trim());
+            }
+            else
+            {
+                MessageBox.Show("Nothing to undo.", "Undo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void UpdateCertificationList(string personName)
+        {
+            var certifications = certificationManager.GetCertificationsForPerson(personName);
+            certificationListBox.Items.Clear();
+            foreach (var cert in certifications)
+            {
+                certificationListBox.Items.Add(cert);
+            }
         }
     }
 }
-

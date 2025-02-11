@@ -42,18 +42,17 @@ For future projects, I can improve by:
 - Researching unfamiliar features (e.g., file handling) before beginning implementation.
 - Testing smaller parts of the program individually before integration to save time during debugging.
 */
-
 using System;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using System.Drawing;
 
 namespace MultiComponentGUI
 {
     public class MainForm : Form
     {
         private Label personNameLabel;
-        private Label searchLabel;
+        private Label searchLabel; // Added back
         private TextBox personNameTextBox;
         private TextBox searchTextBox;
         private Button searchButton;
@@ -73,7 +72,7 @@ namespace MultiComponentGUI
         private void InitializeComponent()
         {
             this.personNameLabel = new System.Windows.Forms.Label();
-            this.searchLabel = new System.Windows.Forms.Label();
+            this.searchLabel = new System.Windows.Forms.Label(); // Added back
             this.personNameTextBox = new System.Windows.Forms.TextBox();
             this.searchTextBox = new System.Windows.Forms.TextBox();
             this.certificationListBox = new System.Windows.Forms.ListBox();
@@ -92,7 +91,7 @@ namespace MultiComponentGUI
             this.personNameLabel.TabIndex = 0;
             this.personNameLabel.Text = "Person Name:";
 
-            // searchLabel
+            // searchLabel (Added back)
             this.searchLabel.AutoSize = true;
             this.searchLabel.Location = new System.Drawing.Point(20, 60);
             this.searchLabel.Name = "searchLabel";
@@ -162,7 +161,7 @@ namespace MultiComponentGUI
             this.BackColor = System.Drawing.Color.Red;
             this.ClientSize = new System.Drawing.Size(500, 400);
             this.Controls.Add(this.personNameLabel);
-            this.Controls.Add(this.searchLabel);
+            this.Controls.Add(this.searchLabel); // Added back
             this.Controls.Add(this.personNameTextBox);
             this.Controls.Add(this.searchTextBox);
             this.Controls.Add(this.searchButton);
@@ -178,10 +177,8 @@ namespace MultiComponentGUI
             this.ResumeLayout(false);
             this.PerformLayout();
         }
-
         private void AddCertButton_Click(object sender, EventArgs e)
         {
-            // Add Certification Button Clicked
             var personName = personNameTextBox.Text.Trim();
             if (string.IsNullOrWhiteSpace(personName))
             {
@@ -202,21 +199,40 @@ namespace MultiComponentGUI
 
         private void SearchButton_Click(object sender, EventArgs e)
         {
-            string searchTerm = searchTextBox.Text.ToLower();
-            string personName = personNameTextBox.Text.ToLower();
+            string searchTerm = searchTextBox.Text.Trim();
 
-            var certifications = certificationManager.GetCertificationsForPerson(personName);
-            var filteredCerts = certifications.Where(c => c.Name.ToLower().Contains(searchTerm)).ToList();
+            // Search for users
+            var matchingUsers = certificationManager.SearchUsers(searchTerm);
 
             certificationListBox.Items.Clear();
-            foreach (var cert in filteredCerts)
-            {
-                certificationListBox.Items.Add(cert);
-            }
 
-            if (filteredCerts.Count == 0)
+            if (matchingUsers.Any())
             {
-                certificationListBox.Items.Add("No certifications found.");
+                foreach (var user in matchingUsers)
+                {
+                    // Display user
+                    certificationListBox.Items.Add($"User: {user}");
+
+                    // Show certifications for this user
+                    var userCertifications = certificationManager.GetCertificationsForPerson(user);
+                    if (userCertifications.Any())
+                    {
+                        foreach (var cert in userCertifications)
+                        {
+                            certificationListBox.Items.Add($"- {cert.Name} (Expires: {cert.ExpirationDate:d})");
+                        }
+                    }
+                    else
+                    {
+                        certificationListBox.Items.Add("  No certifications");
+                    }
+
+                    certificationListBox.Items.Add(""); // Add empty line between users
+                }
+            }
+            else
+            {
+                certificationListBox.Items.Add("No matching users found.");
             }
         }
 

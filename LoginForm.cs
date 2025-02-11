@@ -207,7 +207,6 @@ namespace MultiComponentGUI
                 MessageBox.Show("Critical error during login: " + ex.Message, "Critical Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
         private void VerifyUserCredentials()
         {
             string username = usernameTextBox.Text.Trim();
@@ -215,15 +214,81 @@ namespace MultiComponentGUI
 
             if (CheckAccount(username, password))
             {
-                this.DialogResult = DialogResult.OK;
-                this.Close();
+                // Generate random number between 1 and 100
+                Random random = new Random();
+                int verificationNumber = random.Next(1, 101);
+
+                // Create verification form
+                Form verificationForm = new Form
+                {
+                    Text = "Verification",
+                    Size = new Size(300, 200),
+                    FormBorderStyle = FormBorderStyle.FixedDialog,
+                    MaximizeBox = false,
+                    MinimizeBox = false,
+                    StartPosition = FormStartPosition.CenterScreen,
+                    BackColor = Color.LightGray
+                };
+
+                Label instructionLabel = new Label
+                {
+                    Text = "Enter the number: " + verificationNumber,
+                    Location = new Point(50, 30),
+                    AutoSize = true
+                };
+
+                TextBox verificationTextBox = new TextBox
+                {
+                    Location = new Point(50, 70),
+                    Size = new Size(200, 20)
+                };
+
+                Button submitButton = new Button
+                {
+                    Text = "Submit",
+                    Location = new Point(100, 110),
+                    Size = new Size(100, 30),
+                    BackColor = Color.Black,
+                    ForeColor = Color.White
+                };
+
+                submitButton.Click += (s, e) =>
+                {
+                    if (int.TryParse(verificationTextBox.Text, out int userInput) &&
+                        userInput == verificationNumber)
+                    {
+                        verificationForm.DialogResult = DialogResult.OK;
+                        verificationForm.Close();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Not today SKY NET!!",
+                            "Verification Failed",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
+                    }
+                };
+
+                verificationForm.Controls.AddRange(new Control[]
+                {
+            instructionLabel,
+            verificationTextBox,
+            submitButton
+                });
+
+                verificationForm.AcceptButton = submitButton;
+
+                if (verificationForm.ShowDialog() == DialogResult.OK)
+                {
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
+                }
             }
             else
             {
                 throw new UnauthorizedAccessException("Invalid username or password");
             }
         }
-
         private void CreateAccountButton_Click(object sender, EventArgs e)
         {
             try

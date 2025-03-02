@@ -111,7 +111,7 @@ namespace MultiComponentGUI
             this.searchTextBox.Size = new System.Drawing.Size(200, 20);
             this.searchTextBox.TabIndex = 3;
 
-            // searchButton
+             // searchButton
             this.searchButton.Location = new System.Drawing.Point(350, 60);
             this.searchButton.Name = "searchButton";
             this.searchButton.Size = new System.Drawing.Size(120, 30);
@@ -157,6 +157,15 @@ namespace MultiComponentGUI
             this.undoButton.ForeColor = Color.White;
             this.undoButton.Click += new System.EventHandler(this.UndoButton_Click);
 
+            Button viewHistoryButton = new Button();
+            viewHistoryButton.Text = "View History";
+            viewHistoryButton.Location = new Point(350, 180);
+            viewHistoryButton.Size = new Size(120, 30);
+            viewHistoryButton.BackColor = Color.Black;
+            viewHistoryButton.ForeColor = Color.White;
+            viewHistoryButton.Click += new System.EventHandler(this.ViewHistoryButton_Click);
+            this.Controls.Add(viewHistoryButton);
+
             // MainForm
             this.BackColor = System.Drawing.Color.Red;
             this.ClientSize = new System.Drawing.Size(500, 400);
@@ -180,21 +189,83 @@ namespace MultiComponentGUI
         private void AddCertButton_Click(object sender, EventArgs e)
         {
             var personName = personNameTextBox.Text.Trim();
-            if (string.IsNullOrWhiteSpace(personName))
-            {
-                MessageBox.Show("Enter a valid name before adding a certification.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
 
-            using (var certForm = new CertificationInputForm())
+            // Use our new form that supports different certification types
+            using (var certForm = new CertificationTypeForm(certificationManager))
             {
                 if (certForm.ShowDialog() == DialogResult.OK)
                 {
-                    certificationManager.AddCertification(personName, certForm.CertificationName, certForm.ExpirationDate);
-                    MessageBox.Show("Certification added successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    // The certification has already been added to the manager in the form
+                    // Just update the display
                     UpdateCertificationList(personName);
                 }
             }
+        }
+        private void ViewHistoryButton_Click(object sender, EventArgs e)
+        {
+            // Get the person name from the text box
+            var personName = personNameTextBox.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(personName))
+            {
+                MessageBox.Show("Please enter a person name first.",
+                    "Person Name Required",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Get all certifications for this person
+            var certifications = certificationManager.GetCertificationsForPerson(personName);
+
+            if (certifications.Count == 0)
+            {
+                MessageBox.Show($"No certifications found for {personName}.",
+                    "No Records",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+
+            // Build a comprehensive history string for all certifications
+            System.Text.StringBuilder historyText = new System.Text.StringBuilder();
+            historyText.AppendLine($"Certification History for {personName}:");
+            historyText.AppendLine();
+
+            foreach (var cert in certifications)
+            {
+                historyText.AppendLine($"Certification: {cert.Name}");
+                historyText.AppendLine($"Status: {cert.Status}");
+                historyText.AppendLine($"Current Expiration: {cert.ExpirationDate:MM/dd/yyyy}");
+                historyText.AppendLine();
+
+                // Add renewal history details
+                if (cert.RenewalHistory.Count > 0)
+                {
+                    historyText.AppendLine("Renewal Dates:");
+                    for (int i = 0; i < cert.RenewalHistory.Count; i++)
+                    {
+                        if (i == 0)
+                            historyText.AppendLine($"• Initial certification: {cert.RenewalHistory[i]:MM/dd/yyyy}");
+                        else
+                            historyText.AppendLine($"• Renewal #{i}: {cert.RenewalHistory[i]:MM/dd/yyyy}");
+                    }
+                }
+                else
+                {
+                    historyText.AppendLine("No renewal history available.");
+                }
+
+                historyText.AppendLine();
+                historyText.AppendLine("----------------------------------------");
+                historyText.AppendLine();
+            }
+
+            // Show history in a message box
+            MessageBox.Show(historyText.ToString(),
+                $"Certification History - {personName}",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
         }
 
         private void SearchButton_Click(object sender, EventArgs e)
@@ -263,7 +334,7 @@ namespace MultiComponentGUI
                 MessageBox.Show("Nothing to undo.", "Undo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
-
+    
         private void UpdateCertificationList(string personName)
         {
             var certifications = certificationManager.GetCertificationsForPerson(personName);
